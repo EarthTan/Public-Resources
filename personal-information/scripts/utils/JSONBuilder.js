@@ -33,7 +33,7 @@ class JSONBuilder {
     buildBasics(personalInfo) {
         return {
             name: personalInfo.name,
-            label: "Undergraduate Student in Computer Science",
+            label: "Undergraduate Student at DKU",
             email: personalInfo.email,
             phone: personalInfo.phone,
             website: personalInfo.githubUrl,
@@ -42,8 +42,34 @@ class JSONBuilder {
                 region: "Jiangsu",
                 country: "China"
             },
-            summary: "Undergraduate CS student at Duke Kunshan University, focusing on full-stack engineering, systems programming, and applied machine learning."
+            summary: "Undergraduate  student at Duke Kunshan University",
+            profiles: this.buildProfiles()
         };
+    }
+
+    // 构建社交账号信息
+    buildProfiles() {
+        const profilesSection = document.querySelector('.profiles');
+        if (!profilesSection) return [];
+
+        const profileItems = profilesSection.querySelectorAll('.profile-item');
+        const profiles = [];
+
+        profileItems.forEach(item => {
+            const network = item.getAttribute('data-network');
+            const username = item.getAttribute('data-username');
+            const url = item.querySelector('a')?.href;
+
+            if (network && username && url) {
+                profiles.push({
+                    network: network,
+                    username: username,
+                    url: url
+                });
+            }
+        });
+
+        return profiles;
     }
 
     // 构建工作经历
