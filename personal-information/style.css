@@ -155,6 +155,8 @@ a:hover {
     border-bottom: 2px solid var(--accent);
     padding-bottom: 5px;
     color: var(--h1-title);
+
+    -webkit-text-stroke: 0.5px white;
 }
 
 /* ================== Items ================== */
