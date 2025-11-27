@@ -34,7 +34,7 @@ body::before {
     /* 背景图（保持与你原来的路径一致） */
     background-image: url('../images/bg-mountainlake.jpg');
     background-size: cover;
-    background-position: center calc(50% + 2    00px);
+    background-position: center calc(50% + 200px);
     background-repeat: no-repeat;
 
     /* 模糊度 —— 自己调 */

@@ -12,6 +12,7 @@ class SelectionManager {
             printBtn: document.getElementById('print-btn'),
             downloadBtn: document.getElementById('download-btn'),
             latexBtn: document.getElementById('latex-btn'),
+            jsonBtn: document.getElementById('json-btn'),
             topbar: document.getElementById('topbar'),
             body: document.body
         };
@@ -31,6 +32,7 @@ class SelectionManager {
         this.dom.printBtn.addEventListener('click', () => this.printSelected());
         this.dom.downloadBtn.addEventListener('click', () => this.downloadSelected());
         this.dom.latexBtn.addEventListener('click', () => this.generateLaTeXResume());
+        this.dom.jsonBtn.addEventListener('click', () => this.generateJSONResume());
         
         // 使用事件委托处理复选框
         document.addEventListener('change', (e) => {
@@ -143,6 +145,17 @@ class SelectionManager {
         fileUtils.downloadBlob(blob, 'Tiancheng_Tan_Resume.tex');
         
         this.showNotification('LaTeX简历文件已生成，请用LaTeX编译器渲染');
+        this.exitSelectMode();
+    }
+
+    generateJSONResume() {
+        // JSON Resume 总是包含基本信息，即使没有选择任何项目
+        const jsonResume = jsonBuilder.generateJSONResume(this.selectedItems);
+        const jsonContent = JSON.stringify(jsonResume, null, 2);
+        const blob = fileUtils.createTextBlob(jsonContent, 'application/json');
+        fileUtils.downloadBlob(blob, 'Tiancheng_Tan_Resume.json');
+        
+        this.showNotification('JSON简历文件已生成');
         this.exitSelectMode();
     }
 
