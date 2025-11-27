@@ -21,6 +21,7 @@ class SelectionManager {
         document.getElementById('cancel-btn').addEventListener('click', () => this.cancelSelection());
         document.getElementById('print-btn').addEventListener('click', () => this.printSelected());
         document.getElementById('download-btn').addEventListener('click', () => this.downloadSelected());
+        document.getElementById('latex-btn').addEventListener('click', () => this.generateLaTeXResume());
         
         // Checkbox events
         this.bindCheckboxEvents();
@@ -184,6 +185,203 @@ class SelectionManager {
         
         // Exit select mode after downloading
         this.exitSelectMode();
+    }
+
+    generateLaTeXResume() {
+        if (this.selectedItems.size === 0) {
+            this.showNotification('请先选择要包含在简历中的项目');
+            return;
+        }
+
+        const personalInfo = this.getPersonalInfo();
+        const selectedContent = this.getSelectedContentByCategory();
+        const latexContent = this.generateLaTeXContent(personalInfo, selectedContent);
+        
+        const blob = new Blob([latexContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Tiancheng_Tan_Resume.tex';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('LaTeX简历文件已生成，请用LaTeX编译器渲染');
+        
+        // Exit select mode after generating
+        this.exitSelectMode();
+    }
+
+    getPersonalInfo() {
+        const sidebar = document.querySelector('.sidebar');
+        return {
+            name: sidebar.querySelector('h1').textContent,
+            email: 'tt302@duke.edu',
+            phone: '+86 152 6112 2732',
+            location: 'Kunshan, China',
+            github: 'EarthTan',
+            githubUrl: 'https://github.com/EarthTan'
+        };
+    }
+
+    getSelectedContentByCategory() {
+        const categories = {
+            'Education': [],
+            'Experience': [],
+            'Certificates & Awards': [],
+            'Skills': [],
+            'Projects': []
+        };
+
+        this.selectedItems.forEach(item => {
+            const section = item.closest('section');
+            const sectionTitle = section ? section.querySelector('.section-title').textContent : 'Other';
+            const title = item.querySelector('.item-title').textContent;
+            const desc = item.querySelector('.item-desc').textContent;
+            
+            // 清理描述文本，移除HTML标签和多余空格
+            const cleanDesc = desc.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+            
+            if (categories[sectionTitle]) {
+                categories[sectionTitle].push({
+                    title: title,
+                    description: cleanDesc
+                });
+            }
+        });
+
+        return categories;
+    }
+
+    generateLaTeXContent(personalInfo, content) {
+        return `% Tiancheng Tan - Resume
+% Generated from personal information website
+% Compile with: pdflatex resume.tex
+
+\\documentclass[11pt,a4paper]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{xeCJK}
+\\setCJKmainfont{SimSun}
+\\usepackage{fontspec}
+\\setmainfont{Times New Roman}
+\\usepackage[margin=1in]{geometry}
+\\usepackage{enumitem}
+\\usepackage{hyperref}
+\\usepackage{titlesec}
+
+% Section formatting
+\\titleformat{\\section}{\\Large\\bfseries}{}{0em}{}
+\\titlespacing*{\\section}{0pt}{12pt}{6pt}
+
+\\titleformat{\\subsection}{\\large\\bfseries}{}{0em}{}
+\\titlespacing*{\\subsection}{0pt}{8pt}{4pt}
+
+\\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt}
+\\setlength{\\parindent}{0pt}
+\\setlength{\\parskip}{4pt}
+
+\\begin{document}
+
+% Header
+\\begin{center}
+    {\\Huge\\bfseries ${personalInfo.name}}\\\\[6pt]
+    \\href{mailto:${personalInfo.email}}{${personalInfo.email}} | ${personalInfo.phone} | ${personalInfo.location}\\\\
+    \\href{${personalInfo.githubUrl}}{GitHub: ${personalInfo.github}}
+\\end{center}
+
+\\vspace{10pt}
+
+% Education
+${this.generateEducationSection(content['Education'])}
+
+% Experience
+${this.generateExperienceSection(content['Experience'])}
+
+% Projects
+${this.generateProjectsSection(content['Projects'])}
+
+% Skills
+${this.generateSkillsSection(content['Skills'])}
+
+% Certificates & Awards
+${this.generateCertificatesSection(content['Certificates & Awards'])}
+
+\\end{document}
+`;
+    }
+
+    generateEducationSection(educationItems) {
+        if (!educationItems || educationItems.length === 0) return '';
+        
+        let section = '\\section{Education}\n';
+        educationItems.forEach(item => {
+            section += `\\subsection{${this.escapeLaTeX(item.title)}}\n`;
+            section += `${this.escapeLaTeX(item.description)}\\\\\n`;
+        });
+        return section;
+    }
+
+    generateExperienceSection(experienceItems) {
+        if (!experienceItems || experienceItems.length === 0) return '';
+        
+        let section = '\\section{Experience}\n';
+        experienceItems.forEach(item => {
+            section += `\\subsection{${this.escapeLaTeX(item.title)}}\n`;
+            section += `${this.escapeLaTeX(item.description)}\\\\\n`;
+        });
+        return section;
+    }
+
+    generateProjectsSection(projectItems) {
+        if (!projectItems || projectItems.length === 0) return '';
+        
+        let section = '\\section{Projects}\n';
+        projectItems.forEach(item => {
+            section += `\\subsection{${this.escapeLaTeX(item.title)}}\n`;
+            section += `${this.escapeLaTeX(item.description)}\\\\\n`;
+        });
+        return section;
+    }
+
+    generateSkillsSection(skillItems) {
+        if (!skillItems || skillItems.length === 0) return '';
+        
+        let section = '\\section{Skills}\n';
+        section += '\\begin{itemize}\n';
+        skillItems.forEach(item => {
+            section += `    \\item \\textbf{${this.escapeLaTeX(item.title)}}: ${this.escapeLaTeX(item.description)}\n`;
+        });
+        section += '\\end{itemize}\n';
+        return section;
+    }
+
+    generateCertificatesSection(certificateItems) {
+        if (!certificateItems || certificateItems.length === 0) return '';
+        
+        let section = '\\section{Certificates \\& Awards}\n';
+        section += '\\begin{itemize}\n';
+        certificateItems.forEach(item => {
+            section += `    \\item \\textbf{${this.escapeLaTeX(item.title)}}: ${this.escapeLaTeX(item.description)}\n`;
+        });
+        section += '\\end{itemize}\n';
+        return section;
+    }
+
+    escapeLaTeX(text) {
+        if (!text) return '';
+        return text
+            .replace(/\\/g, '\\textbackslash{}')
+            .replace(/\{/g, '\\{')
+            .replace(/\}/g, '\\}')
+            .replace(/\$/g, '\\$')
+            .replace(/%/g, '\\%')
+            .replace(/#/g, '\\#')
+            .replace(/_/g, '\\_')
+            .replace(/\^/g, '\\^{}')
+            .replace(/&/g, '\\&')
+            .replace(/~/g, '\\~{}')
+            .replace(/\n/g, '\\\\');
     }
 
     getSelectedContent() {

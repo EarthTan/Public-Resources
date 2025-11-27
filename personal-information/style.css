@@ -360,6 +360,17 @@ a:hover {
     gap: 8px;
 }
 
+/* 减少 DOM 重排 - 使用 CSS 控制按钮显示隐藏 */
+#copy-btn,
+#select-btn {
+    display: inline-block;
+}
+
+.select-mode #copy-btn,
+.select-mode #select-btn {
+    display: none;
+}
+
 
 
 
