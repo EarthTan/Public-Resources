@@ -106,8 +106,8 @@ class SelectionManager {
             return;
         }
 
-        const content = htmlBuilder.generateSelectedContent(this.selectedItems);
-        fileUtils.printHTML(content, 'Tiancheng Tan - Selected Items');
+        const content = htmlBuilder.generateCompleteContent(this.selectedItems);
+        fileUtils.printHTML(content, 'Tiancheng Tan - Resume');
         
         // 打印后退出选择模式
         this.exitSelectMode();
@@ -119,10 +119,10 @@ class SelectionManager {
             return;
         }
 
-        const content = htmlBuilder.generateSelectedContent(this.selectedItems);
-        const htmlContent = htmlBuilder.generateDownloadHTML(content);
-        const blob = fileUtils.createHTMLBlob(htmlContent, 'Tiancheng Tan - Selected Items');
-        fileUtils.downloadBlob(blob, 'Tiancheng_Tan_Selected_Items.html');
+        const content = htmlBuilder.generateCompleteContent(this.selectedItems);
+        const htmlContent = htmlBuilder.generateDownloadHTML(content, 'Tiancheng Tan - Resume');
+        const blob = fileUtils.createHTMLBlob(htmlContent, 'Tiancheng Tan - Resume');
+        fileUtils.downloadBlob(blob, 'Tiancheng_Tan_Resume.html');
         
         this.showNotification('文件下载完成');
         this.exitSelectMode();

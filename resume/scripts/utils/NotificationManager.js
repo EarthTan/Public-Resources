@@ -26,16 +26,13 @@ class NotificationManager {
     }
 
     addStyles() {
+        // 使用HTMLBuilder中的统一通知样式
+        htmlBuilder.ensureNotificationStyles();
+        
+        // 添加额外的动画样式
         const style = document.createElement('style');
         style.textContent = `
             .notification {
-                background: #27ae60;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 4px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                font-size: 14px;
-                max-width: 300px;
                 opacity: 0;
                 transform: translateX(100%);
                 transition: all 0.3s ease;
@@ -50,25 +47,13 @@ class NotificationManager {
                 opacity: 0;
                 transform: translateX(100%);
             }
-            
-            .notification.error {
-                background: #e74c3c;
-            }
-            
-            .notification.warning {
-                background: #f39c12;
-            }
-            
-            .notification.info {
-                background: #3498db;
-            }
         `;
         document.head.appendChild(style);
     }
 
     show(message, type = 'success', duration = 3000) {
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+        notification.className = `notification notification-${type}`;
         notification.textContent = message;
         
         this.container.appendChild(notification);

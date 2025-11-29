@@ -12,44 +12,12 @@ class FileUtils {
         URL.revokeObjectURL(url);
     }
 
-    // 打印 HTML 内容 - 改进可靠性
-    printHTML(content, title = 'Document') {
+    // 打印 HTML 内容 - 使用新的HTMLBuilder
+    printHTML(content, title = 'Tiancheng Tan - Selected Items', theme = 'light') {
+        const printHTML = htmlBuilder.generatePrintHTML(content, title, theme);
         const printWindow = window.open('', '_blank');
         
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>${title}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .item { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-                    .item-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-                    .item-desc { line-height: 1.4; }
-                    img { max-width: 200px; height: auto; margin-right: 15px; float: left; }
-                    .clear { clear: both; }
-                    @media print {
-                        body { margin: 0; }
-                        .item { break-inside: avoid; }
-                    }
-                </style>
-            </head>
-            <body>
-                ${content}
-                <div class="clear"></div>
-                <script>
-                    // 更可靠的打印触发方式
-                    document.addEventListener('DOMContentLoaded', function() {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => window.close(), 500);
-                        }, 100);
-                    });
-                </script>
-            </body>
-            </html>
-        `);
-        
+        printWindow.document.write(printHTML);
         printWindow.document.close();
         printWindow.focus();
         
@@ -57,7 +25,11 @@ class FileUtils {
         setTimeout(() => {
             if (!printWindow.closed) {
                 printWindow.print();
-                setTimeout(() => printWindow.close(), 500);
+                setTimeout(() => {
+                    if (!printWindow.closed) {
+                        printWindow.close();
+                    }
+                }, 500);
             }
         }, 200);
     }
@@ -73,29 +45,9 @@ class FileUtils {
         }
     }
 
-    // 创建 HTML Blob
-    createHTMLBlob(content, title = 'Document') {
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>${title}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .item { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-                    .item-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-                    .item-desc { line-height: 1.4; }
-                    img { max-width: 200px; height: auto; margin-right: 15px; float: left; }
-                    .clear { clear: both; }
-                </style>
-            </head>
-            <body>
-                <h1>${title}</h1>
-                ${content}
-                <div class="clear"></div>
-            </body>
-            </html>
-        `;
+    // 创建 HTML Blob - 使用新的HTMLBuilder
+    createHTMLBlob(content, title = 'Tiancheng Tan - Selected Items', theme = 'light') {
+        const html = htmlBuilder.generateDownloadHTML(content, title, theme);
         return new Blob([html], { type: 'text/html' });
     }
 
